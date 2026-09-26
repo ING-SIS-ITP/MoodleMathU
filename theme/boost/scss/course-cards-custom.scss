@@ -19,10 +19,17 @@
         gap: 25px;
     }
     
-    // 2 columnas en móviles
+    // 2 columnas en tablets chicas / móviles grandes
     @media (max-width: 767px) {
         grid-template-columns: repeat(2, 1fr);
         gap: 20px;
+    }
+
+    // 1 columna en celulares angostos: con 2 columnas la tarjeta queda muy
+    // chica para mostrar imagen + título + descripción con espacio decente.
+    @media (max-width: 576px) {
+        grid-template-columns: 1fr;
+        gap: 16px;
     }
     
     // Asegurar que el h2 no se vea afectado por el grid
@@ -198,24 +205,47 @@
     }
 }
 
-// Hacer que el contenido principal ocupe TODO el ancho disponible
+// Hacer que el contenido principal ocupe TODO el ancho disponible.
+// OJO: main-inner > #page-content > #region-main-box > #region-main están
+// anidados uno dentro del otro. Si a los 4 se les pone padding lateral,
+// se ACUMULAN (30px+30px por nivel = hasta 240px perdidos en mobile, donde
+// eso es más de la mitad del ancho de pantalla). El padding va una sola vez,
+// en el contenedor más externo; el resto solo ocupa el 100% sin padding propio.
 #page-content,
 .frontpage-content,
 #page.drawers .main-inner,
 .main-inner,
-#region-main-box {
-    max-width: 100% !important;
-    width: 100% !important;
-    padding: 0 30px !important;
-    margin: 0 auto !important;
-}
-
-// Region-main con padding pero se sobrescribe en frontpage
+#region-main-box,
 #region-main {
     max-width: 100% !important;
     width: 100% !important;
-    padding: 0 30px !important;
+    padding: 0 !important;
     margin: 0 auto !important;
+}
+
+.main-inner {
+    padding: 0 30px !important;
+}
+
+// En mobile, mejor un ancho relativo (90%, con 5% de aire a cada lado)
+// que un padding fijo en px, para que escale bien en cualquier pantalla chica.
+@media (max-width: 768px) {
+    /* #page.drawers .main-inner y body.limitedwidth #page.drawers .main-inner
+       (definidas más arriba en este archivo) tienen más especificidad que
+       .main-inner sola. Páginas como el dashboard/perfil traen la clase
+       "limitedwidth" en el body, pero otras (calendario, por ejemplo) no —
+       hay que igualar especificidad con ambas variantes para cubrir los dos casos. */
+    #page.drawers .main-inner,
+    body.limitedwidth #page.drawers .main-inner,
+    .main-inner {
+        /* .main-inner es hijo flex con flex:1 0 auto, así que flex-grow
+           ignora "width" y lo estira igual; max-width sí limita el flex-grow. */
+        flex: 0 1 auto !important;
+        width: 90% !important;
+        max-width: 90% !important;
+        padding: 0 !important;
+        margin: 0 auto !important;
+    }
 }
 
 // Sobrescribir limitaciones de ancho en body.limitedwidth
@@ -223,11 +253,52 @@ body.limitedwidth #page.drawers .main-inner {
     max-width: 100% !important;
 }
 
-// Asegurar que la página completa use todo el ancho
-#page-wrapper,
-#page {
+// Asegurar que la página completa use todo el ancho.
+// #page NO lleva width:100% a propósito: es un bloque normal (aunque sea
+// flex, sigue siendo block-level), así que ya ocupa el 100% disponible por
+// defecto sin necesidad de forzarlo. Si se fuerza width:100% además dejamos
+// max-width, cuando Moodle abre el drawer del índice de curso y le pone
+// margin-left a #page.drawers (ver layout.scss: .show-drawer-left), ese
+// width fijo le impide encogerse — el contenido se sale de pantalla al abrir,
+// y como "width" no se puede animar entre auto y 100% (salta de golpe en vez
+// de transicionar), al cerrar se nota un salto feo aunque ya funcione bien.
+// Con solo max-width no hace falta ninguna excepción por clase de drawer.
+#page-wrapper {
     max-width: 100% !important;
     width: 100% !important;
+}
+#page {
+    max-width: 100% !important;
+}
+
+// El reporte de calificador (tabla ancha con muchas columnas) depende de que
+// #region-main pueda crecer más allá del 100% para habilitar su propio
+// scroll horizontal (ver grade.scss: .path-grade-report-grader #region-main
+// { width:auto; min-width:100%; }). Nuestro width:100%!important de arriba
+// se lo impide, dejando la tabla sin scroll en mobile.
+.path-grade-report-grader #region-main {
+    width: auto !important;
+    min-width: 100% !important;
+}
+
+// La tabla del calificador es muy ancha (muchas columnas de alumnos/notas).
+// Moodle deja overflow-x:visible en .gradeparent (grade.scss usa "initial",
+// pensado para pantallas anchas donde #region-main crece en vez de scrollear),
+// así que en mobile la tabla se desborda sin poder deslizarse para verla.
+.path-grade-report-grader .gradeparent {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+}
+
+// La paginación del calificador vive dentro de .stickyfooter (position:fixed,
+// clavado siempre abajo del viewport — ver sticky-footer.scss). Es un
+// comportamiento a propósito de Moodle para tablas largas, pero acá se pide
+// que quede pegada a la tabla en el flujo normal en vez de flotando fija.
+.path-grade-report-grader .stickyfooter {
+    position: static !important;
+    bottom: auto !important;
+    box-shadow: none !important;
+    border-top: 1px solid #dee2e6;
 }
 
 // Eliminar restricciones de containers de Bootstrap

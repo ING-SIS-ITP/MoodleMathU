@@ -64,9 +64,16 @@
 
         <a href="{{{ config.homeurl }}}" class="navbar-brand d-none d-md-flex align-items-center m-0 me-4 p-0 aabtn">
 
-            <img src="https://i0.wp.com/itp.edu.co/ITP2022/wp-content/uploads/2025/07/Logo-azul-PNG-01-scaled.png"
-            alt="MathU Logo"
-            style="height:50px; max-height:60px; width:auto;">
+            <span style="display:inline-flex; align-items:center; background:#0b1a2b; padding:6px 12px; border-radius:8px;">
+                {{#output.get_compact_logo_url}}
+                <img src="{{output.get_compact_logo_url}}" alt="{{sitename}}" style="height:32px; max-height:32px; width:auto;">
+                {{/output.get_compact_logo_url}}
+                {{^output.get_compact_logo_url}}
+                <img src="{{config.wwwroot}}/theme/boost/pix/institucion_universitaria_del_putumayo.png"
+                alt="{{sitename}}"
+                style="height:32px; max-height:32px; width:auto;">
+                {{/output.get_compact_logo_url}}
+            </span>
         </a>
         {{#primarymoremenu}}
             <div class="primary-navigation">
