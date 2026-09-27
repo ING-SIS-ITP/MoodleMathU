@@ -29,7 +29,12 @@
                 <!-- Sección Institución -->
                 <div class="col-md-4 footer-col footer-col-first">
                     <div class="footer-logo-section">
-                        {{#pix}} institucion_universitaria_del_putumayo, theme_boost, Logo Universidad del Putumayo {{/pix}}
+                        {{#output.get_logo_url}}
+                        <img src="{{output.get_logo_url}}" alt="{{sitename}}">
+                        {{/output.get_logo_url}}
+                        {{^output.get_logo_url}}
+                        {{#pix}} institucion_universitaria_del_putumayo, theme_boost, {{sitename}} {{/pix}}
+                        {{/output.get_logo_url}}
                         <p class="footer-description">
                             Institución de Educación Superior sujeta a inspección y vigilancia por el Ministerio de Educación Nacional. 
                             Ofrecemos programas a nivel de Pre-grado por ciclos propedéuticos con modalidad presencial. 
@@ -185,10 +190,9 @@
             }
         });
         
-        // Solo ejecutar en la página de inicio (frontpage)
-        var esPaginaInicio = $('body').hasClass('pagelayout-frontpage') || 
-                            ($('body').hasClass('path-site') && window.location.pathname === '/') ||
-                            (window.location.pathname.indexOf('/index.php') !== -1 && !window.location.search);
+        // Solo ejecutar en la página de inicio real (frontpage), no en cualquier index.php
+        // (course/index.php, my/index.php, etc. no deben disparar el modal)
+        var esPaginaInicio = $('body').hasClass('pagelayout-frontpage');
         
         if (esPaginaInicio) {
             console.log('📍 Estás en la página de inicio');
@@ -268,6 +272,35 @@ body {
     overflow-x: hidden;
 }
 
+/* El navbar fixed-top mide ~61px pero Moodle reserva solo 60px de margen
+   (constante $navbar-height del tema), así que el contenido queda pegado
+   al navbar en todas las vistas normales (dashboard, cursos, admin, etc).
+   Se agrega aire visual extra. */
+#page.drawers {
+    margin-top: 76px !important;
+}
+
+/* Calendario (bloque del dashboard y vista completa) en mobile: los nombres
+   de mes ("August"/"October") y los encabezados de día ("Thu", "Fri"...)
+   no caben en columnas tan angostas y Moodle los corta letra por letra.
+   Se reduce tipografía/espaciado y se evita el salto de línea forzado. */
+@media (max-width: 480px) {
+    .calendar-controls .previous,
+    .calendar-controls .next,
+    .calendar-controls .current {
+        font-size: 0.78rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .maincalendar .calendarmonth th,
+    .maincalendar .calendarmonth td {
+        font-size: 0.7rem;
+        padding: 2px 1px;
+        white-space: nowrap;
+    }
+}
+
 .custom-footer {
     width: 100vw;
     position: relative;
@@ -313,9 +346,9 @@ body {
 }
 
 .footer-logo-section img {
-    width: 200px;
-    max-width: 200px;
-    height: auto;
+    height: 145px;
+    width: auto;
+    max-width: 480px;
     margin-bottom: 20px;
     display: block;
 }
@@ -515,8 +548,9 @@ body {
     }
     
     .footer-logo-section img {
-        width: 150px;
-        max-width: 150px;
+        height: 100px;
+        width: auto;
+        max-width: 340px;
     }
     
     .footer-description {
