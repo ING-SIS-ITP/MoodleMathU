@@ -310,6 +310,17 @@ body.limitedwidth #page.drawers .main-inner {
     padding-right: 30px !important;
 }
 
+// El bloque "Mis cursos" (block_myoverview) envuelve la grilla de tarjetas en
+// <div class="container-fluid p-0"> a propósito (main.mustache) para que las
+// cards usen el mismo ancho que la barra de filtros de arriba. La regla
+// genérica de .container-fluid de arriba le gana con !important e ignora el
+// p-0, metiendo 30px de padding de más a cada lado — la card queda angosta e
+// indentada respecto a los filtros. Se restaura el padding 0 para este caso.
+.block-myoverview .container-fluid {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
 // Contenedor específico de la portada
 .pagelayout-frontpage #page-content {
     max-width: 100% !important;
@@ -530,5 +541,66 @@ h2:contains("Cursos disponibles") {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
+}
+
+// ── /my/ (Vista general de cursos, bloque myoverview) en mobile ──
+
+// Barra de filtros (agrupador, buscador, orden, vista) viene en fila
+// (block_myoverview/main.mustache: [data-region="filter"] > .d-flex.g-0 > 4
+// hijos). En mobile una fila de 4 controles queda apretadísima — se apila en
+// columna, a todo el ancho.
+@media (max-width: 768px) {
+    [data-region="filter"] {
+        flex-wrap: wrap;
+    }
+    [data-region="filter"] .d-flex.g-0 {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+        gap: 8px;
+    }
+    [data-region="filter"] .d-flex.g-0 > * {
+        margin: 0 !important;
+        width: 100%;
+    }
+}
+
+// Tarjetas de "Mis cursos" (core_course/coursecards, usa row-cols-sm-2 de
+// Bootstrap desde 576px): entre 576-768px quedan 2 columnas muy angostas.
+// Se fuerza 1 sola columna a todo el ancho hasta el mismo breakpoint que usa
+// el resto del sitio (768px).
+@media (max-width: 768px) {
+    [data-region="courses-view"] .card-grid.row {
+        display: block !important;
+    }
+    [data-region="courses-view"] .card-grid.row > .col {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: 0 0 100% !important;
+    }
+}
+
+// ── /user/index.php (participantes del curso) en mobile ──
+// La barra de acciones masivas ("Seleccionar todos", "Con los usuarios
+// seleccionados...") y el botón "Matricular usuarios" vienen en fila
+// (user/index.php: .buttons .d-flex.flex-wrap y [data-region="wrapper"]).
+// Se apilan en columna para que no se corten ni queden ilegibles en mobile.
+@media (max-width: 768px) {
+    .userlist .buttons .d-flex.flex-wrap {
+        flex-direction: column;
+        align-items: stretch !important;
+        gap: 8px;
+    }
+    .userlist .buttons .d-flex.flex-wrap > * {
+        width: 100%;
+        margin-left: 0 !important;
+    }
+    [data-region="wrapper"][data-table-uniqueid] {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    [data-region="wrapper"][data-table-uniqueid] > * {
+        width: 100%;
+    }
 }
 
